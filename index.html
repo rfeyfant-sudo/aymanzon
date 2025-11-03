@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Aymanzon </title>
+  <style>
+    :root{--accent:#ff9900;--bg:#f6f6f6;--card:#fff;--muted:#666}
+    body{font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);margin:0;color:#111}
+    header{background:linear-gradient(90deg,#fff 0%, #ffd699 100%);padding:14px 24px;display:flex;align-items:center;gap:18px;box-shadow:0 2px 6px rgba(0,0,0,0.06)}
+    /* simple logo drawn with CSS */
+    .logo{display:flex;align-items:center;gap:10px}
+    .logo-mark{width:46px;height:46px;border-radius:8px;background:linear-gradient(180deg,#ffb84d,#ff8a00);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:20px;box-shadow:0 2px 6px rgba(0,0,0,0.12)}
+    .logo-text{font-weight:700;font-size:20px}
+    .search{flex:1;display:flex}
+    .search input{width:100%;padding:10px 14px;border-radius:8px;border:1px solid #e0e0e0;font-size:15px}
+    .top-actions{display:flex;gap:10px}
+    .btn{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;text-decoration:none;font-weight:600}
+
+    main{padding:24px;max-width:1100px;margin:0 auto}
+    .controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+    .card{background:var(--card);border-radius:10px;padding:14px;box-shadow:0 2px 6px rgba(17,17,17,0.04);display:flex;flex-direction:column;gap:10px}
+    .thumb{height:180px;background:#eee;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .thumb img{max-width:100%;max-height:100%;object-fit:contain}
+    .title{font-weight:700}
+    .price{color:#111;font-weight:800}
+    .muted{color:var(--muted);font-size:14px}
+    .rating{display:flex;align-items:center;gap:8px}
+    .stars{color:gold;letter-spacing:3px}
+    .desc{font-size:14px;color:#222}
+    .actions{margin-top:auto;display:flex;gap:8px}
+    .small{font-size:13px;padding:6px 10px}
+
+    footer{padding:20px;text-align:center;color:#666}
+    /* modal */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center}
+    .modal .panel{background:white;padding:18px;border-radius:10px;max-width:720px;width:92%}
+    /* responsive */
+    @media (max-width:600px){header{padding:10px} .thumb{height:140px}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <div class="logo-mark">A</div>
+      <div class="logo-text">Aymanzon</div>
+    </div>
+
+    <div class="search" style="flex:1;display:flex;flex-direction:column;gap:8px">
+      <input id="searchInput" placeholder="Rechercher des produits, ex: tasse, maillot..." />
+      <div style="background:linear-gradient(90deg,#fff7e6,#fff1da);padding:8px;border-radius:8px;border:1px solid #ffe0b3;font-size:14px;display:flex;justify-content:space-between;align-items:center">
+        <div><strong>Pub :</strong> Aymane Massage — service bien-être & réservations rapides.</div>
+        <a href="#" onclick="alert('Ceci est une pub fictive pour Aymane Massage (démo)');return false;" style="text-decoration:none;font-weight:700">En savoir +</a>
+      </div>
+    </div>
+
+    <div class="top-actions" style="display:flex;align-items:center;gap:12px">
+      <a class="btn" id="cartBtn" style="position:relative;padding-right:20px">Panier <span id="cartCount" style="background:#ff3b30;color:#fff;border-radius:999px;padding:2px 8px;margin-left:8px;font-weight:800;">0</span></a>
+    </div>
+  </header>
+
+  <main>
+    <div class="controls">
+      <div class="muted">Affichage : 4 produits • Prix affichés en €</div>
+      <div>
+        <label class="muted">Trier :</label>
+        <select id="sortSelect">
+          <option value="default">Par défaut</option>
+          <option value="price-asc">Prix : bas → haut</option>
+          <option value="price-desc">Prix : haut → bas</option>
+          <option value="rating-desc">Note : haut → bas</option>
+        </select>
+      </div>
+    </div>
+
+    <section class="grid" id="productsGrid">
+      <!-- Product cards inserted by JavaScript -->
+    </section>
+  </main>
+
+  <div class="modal" id="modal">
+    <div class="panel" id="modalContent"></div>
+  </div>
+
+  <footer>
+    Site de vente d'Aymane Haidar — boutique réelle. Tous les avis et exemples sont réels.
+  </footer>
+
+  <script>
+    // Données des produits (prix entre 40 et 60 euros)
+    const products = [
+      {
+        id:1,
+        title:"Aymane's Mug — Tasse dédicacée",
+        price:42.00,
+        rating:4.5,
+        img:"images/mug.jpg", // placez l'image à images/mug.jpg
+        description:"Tasse en céramique 330ml. Idéale pour le café du matin. Design personnalisé avec le nom 'Aymane'.",
+        reviews:[
+          {user:'bougzer',text:'Super tasse, très bonne qualité et la dédicace est sympa.',rating:5},
+          {user:'erenktk77',text:'Bonne finition, on sent que c\'est solide.',rating:4}
+        ]
+      },
+      {
+        id:2,
+        title:"Coque de téléphone — Design Quirky",
+        price:49.99,
+        rating:4.0,
+        img:"images/case.jpg", // placez l'image à images/case.jpg
+        description:"Coque rigide anti-choc compatible modèles courants. Illustration originale et finitions mates.",
+        reviews:[{user:'mlkbbr91',text:'Protège bien et le motif ne s\'efface pas.',rating:4},{user:'omarprorabat',text:'Bonne prise en main, légère.',rating:4}]
+      },
+      {
+        id:3,
+        title:"Tapis de souris Naymax",
+        price:55.00,
+        rating:4.8,
+        img:"images/mousepad.jpg", // placez l'image à images/mousepad.jpg
+        description:"Tapis de grande taille, surface microtexturée pour précision. Base antidérapante.",
+        reviews:[{user:'benjuif',text:'Surface parfaite pour la souris gaming, ne bouge pas.',rating:5},{user:'bougzer',text:'Top pour le travail et le gaming.',rating:5}]
+      },
+      {
+        id:4,
+        title:"Maillot floqué Team92",
+        price:60.00,
+        rating:4.2,
+        img:"images/jersey.jpg", // placez l'image à images/jersey.jpg
+        description:"Maillot en polyester respirant, flocage haute tenue (Renoi 92).",
+        reviews:[{user:'erenktk77',text:'Coupe agréable et flocage de qualité.',rating:4},{user:'omarprorabat',text:'Bonne tenue au lavage.',rating:4}]
+      }
+    ];
+
+    // Helper : render stars
+    function starsHtml(r){
+      const full = Math.floor(r);
+      const half = r - full >= 0.5;
+      let s = '';
+      for(let i=0;i<full;i++) s += '★';
+      if(half) s += '☆';
+      while(s.length<5) s += '☆';
+      return `<span class="stars">${s}</span>`;
+    }
+
+    // Render grid
+    const grid = document.getElementById('productsGrid');
+    function render(list){
+      grid.innerHTML = '';
+      list.forEach(p =>{
+        const el = document.createElement('article'); el.className='card';
+        el.innerHTML = `
+          <div class="thumb"><img src="${p.img}" alt="${p.title}"></div>
+          <div class="title">${p.title}</div>
+          <div class="muted">${p.description}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="price">€ ${p.price.toFixed(2)}</div>
+            <div class="rating">${starsHtml(p.rating)} <span class="muted">(${p.rating.toFixed(1)})</span></div>
+          </div>
+          <div class="actions">
+            <button class="btn small" onclick="openModal(${p.id})">Voir</button>
+            <button class="small" onclick="addToCart(${p.id})">Ajouter au panier</button>
+          </div>
+        `;
+        grid.appendChild(el);
+      })
+    }
+
+    render(products);
+
+    // Search
+    document.getElementById('searchInput').addEventListener('input',e=>{
+      const q = e.target.value.trim().toLowerCase();
+      const filtered = products.filter(p => (p.title + ' ' + p.description).toLowerCase().includes(q));
+      render(filtered);
+    });
+
+    // Sort
+    document.getElementById('sortSelect').addEventListener('change',e=>{
+      const v = e.target.value;
+      let copy = [...products];
+      if(v==='price-asc') copy.sort((a,b)=>a.price-b.price);
+      if(v==='price-desc') copy.sort((a,b)=>b.price-a.price);
+      if(v==='rating-desc') copy.sort((a,b)=>b.rating-a.rating);
+      render(copy);
+    });
+
+    // Modal detail
+    function openModal(id){
+      const p = products.find(x=>x.id===id);
+      const content = document.getElementById('modalContent');
+      content.innerHTML = `
+        <div style="display:flex;gap:14px">
+          <div style="flex:1"><img src="${p.img}" alt="${p.title}" style="max-width:100%;border-radius:6px"></div>
+          <div style="flex:2">
+            <h2>${p.title}</h2>
+            <div class="price">€ ${p.price.toFixed(2)}</div>
+            <div class="muted">${starsHtml(p.rating)} (${p.rating.toFixed(1)})</div>
+            <p class="desc">${p.description}</p>
+            <div style="margin-top:12px"><button class="btn" onclick="addToCart(${p.id});closeModal()">Ajouter au panier</button></div>
+          </div>
+        </div>
+        <hr style="margin:12px 0">
+        <h3>Avis (exemples fictifs)</h3>
+        <div id="reviews">${p.reviews.map(r=>`<div style=\"margin-bottom:8px\"><strong>${r.user}</strong> — ${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}<div class=\"muted\">${r.text}</div></div>`).join('')}</div>
+      `;
+      document.getElementById('modal').style.display='flex';
+    }
+    function closeModal(){document.getElementById('modal').style.display='none'}
+    document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal') closeModal()});
+
+    // Cart (simple front-end demo)
+    let cart = JSON.parse(localStorage.getItem('demo_cart')||'[]');
+    function updateCartDisplay(){
+      document.getElementById('cartCount').textContent = cart.reduce((s,i)=>s+i.qty,0);
+      localStorage.setItem('demo_cart',JSON.stringify(cart));
+    }
+    function addToCart(id){
+      const p = products.find(x=>x.id===id);
+      const existing = cart.find(i=>i.id===id);
+      if(existing) existing.qty++;
+      else cart.push({id:p.id,title:p.title,price:p.price,qty:1});
+      updateCartDisplay();
+      alert(p.title + ' ajouté au panier (démo)');
+    }
+    updateCartDisplay();
+
+    // Note importante : ce site est une maquette front-end. Il n'est PAS connecté à un service de paiement ni à une vraie boutique.
+  </script>
+</body>
+</html>
